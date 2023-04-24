@@ -36,7 +36,55 @@ class CreateCinemaSchema extends Migration
      */
     public function up()
     {
-        throw new \Exception('implement in coding task 4, you can ignore this exception if you are just running the initial migrations.');
+        Schema::create('movies', function($table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->text('description');
+            $table->integer('duration')->unsigned();
+            $table->string('image');
+            $table->timestamps();
+        });
+
+        Schema::create('shows', function($table) {
+            $table->increments('id');
+            $table->integer('movie_id')->unsigned();
+            $table->foreign('movie_id')->references('id')->on('movies')->onDelete('cascade');
+            $table->dateTime('start_time');
+            $table->dateTime('end_time');
+            $table->integer('max_seats')->unsigned();
+            $table->double('price', 8, 2);
+            $table->timestamps();
+        });
+
+        Schema::create('showrooms', function($table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->text('description');
+            $table->integer('capacity')->unsigned();
+            $table->timestamps();
+        });
+
+        Schema::create('seats', function($table) {
+            $table->increments('id');
+            $table->integer('showroom_id')->unsigned();
+            $table->foreign('showroom_id')->references('id')->on('showrooms')->onDelete('cascade');
+            $table->enum('type', ['standard', 'vip', 'couple']);
+            $table->integer('row_number')->unsigned();
+            $table->integer('seat_number')->unsigned();
+            $table->timestamps();
+        });
+
+        Schema::create('bookings', function($table) {
+            $table->increments('id');
+            $table->integer('show_id')->unsigned();
+            $table->foreign('show_id')->references('id')->on('shows')->onDelete('cascade');
+            $table->integer('seat_id')->unsigned();
+            $table->foreign('seat_id')->references('id')->on('seats')->onDelete('cascade');
+            $table->integer('user_id')->unsigned();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->timestamps();
+        });
+
     }
 
     /**
@@ -46,5 +94,10 @@ class CreateCinemaSchema extends Migration
      */
     public function down()
     {
+        Schema::dropIfExists('movies');
+        Schema::dropIfExists('shows');
+        Schema::dropIfExists('showrooms');
+        Schema::dropIfExists('seats');
+        Schema::dropIfExists('bookings');
     }
 }
